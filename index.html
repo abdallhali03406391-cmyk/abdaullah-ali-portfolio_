@@ -1,0 +1,285 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> - عبد الله علي</title>
+    <meta name="description" content="بورتفوليو شخصي لعرض المشاريع، شهادات تقدير الكورسات والمهارات الشخصية">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ربط ملف التنسيقات الخارجي -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col justify-between">
+    
+    <!-- ━━━ 1. الهيدر وشريط التنقل ━━━ -->
+    <header>
+        <nav class="fixed top-0 left-0 right-0 z-50 glass" role="navigation" aria-label="القائمة الرئيسية">
+            <div class="max-w-7xl mx-auto px-6 sm:px-8">
+                <div class="flex items-center justify-between h-12">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl font-extrabold text-white">Eng/Abdullah Ali</span>
+                    </div>
+
+                    <ul id="desktop-nav" class="hidden md:flex items-center gap-5 list-none m-0 p-0"></ul>
+                    <div id="desktop-social" class="hidden md:flex items-center gap-2"></div>
+
+                    <button id="menu-toggle" class="md:hidden p-1.5 rounded-lg hover:bg-white/10 transition" aria-label="فتح القائمة" aria-expanded="false">
+                        <svg class="w-5.5 h-5.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- قائمة الهاتف -->
+            <div id="mobile-menu" class="md:hidden hidden px-6 pb-3 bg-[var(--primary)] border-t border-red-950">
+                <ul id="mobile-nav-list" class="flex flex-col gap-1.5 mt-1.5 list-none m-0 p-0"></ul>
+                <div id="mobile-social" class="flex gap-2 mt-2 pt-2 border-t border-red-900/50"></div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ━━━ 2. المحتوى الرئيسي ━━━ -->
+    <main class="flex-grow pt-12">
+        
+        <!-- Hero Section -->
+        <section id="hero" class="pt-10 pb-6 px-6 bg-[var(--primary-light)] relative overflow-hidden">
+            <div class="max-w-7xl mx-auto w-full">
+                <div class="flex flex-col lg:flex-row items-center gap-4 lg:gap-8">
+                    <div class="flex-shrink-0">
+                        <div class="avatar-rect-border relative group flex flex-col items-center">
+                            <!-- الصورة الشخصية -->
+                            <img id="user-avatar" src="images/me.jpg" alt="عبد الله علي" class="w-32 h-40 rounded-[1rem] object-cover shadow-sm">
+                            
+                            <!-- زرار التغيير (مخفي افتراضياً وهيطهر للأدمن بس) -->
+                            <label id="change-avatar-btn" for="avatar-input" class="hidden absolute bottom-2 bg-[#800020] text-white text-[10px] px-2 py-1 rounded-md shadow-md cursor-pointer hover:bg-[#600018] transition flex items-center gap-1 z-10">
+                                <i class="fas fa-camera"></i> تغيير الصورة
+                            </label>
+                            <input type="file" id="avatar-input" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+
+                    <div class="text-center lg:text-right flex-1">
+                        <p class="text-xs sm:text-sm text-[var(--primary)] font-bold mb-0.5">👋 مرحباً، أنا</p>
+                        <h1 class="hero-title text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight mb-1">
+                            <span class="text-[var(--primary)]">عبد الله علي</span>
+                        </h1>
+                        <p class="text-xs sm:text-sm text-slate-800 max-w-2xl mb-2.5 leading-relaxed font-medium">
+                            طالب في كلية الحاسبات والمعلومات (قسم تكنولوجيا المعلومات IT) جامعة قنا. مهتم بمجال تطوير واجهات المستخدم الرسومية وتصميمها لدمج الشغف بالرسم والتطوير، بجانب دراستي المكثفة للشبكات، وإدارة الأنظمة والكلود.
+                        </p>
+                        <div class="flex flex-wrap gap-1.5 justify-center lg:justify-start">
+                            <span class="badge px-2.5 py-0.5 rounded-full text-[10px] font-bold">🎓 كلية الحاسبات والمعلومات</span>
+                            <span class="badge px-2.5 py-0.5 rounded-full text-[10px] font-bold">💻 قسم IT</span>
+                            <span class="badge px-2.5 py-0.5 rounded-full text-[10px] font-bold">🚀 Network Engineer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-5 px-6 bg-white border-b border-slate-100">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-6 items-start">
+                    <!-- نبذة عني -->
+                    <div class="space-y-1 relative group">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-lg sm:text-xl font-bold text-slate-800">نبذة عني</h2>
+                            <button id="edit-about-btn" class="hidden text-slate-400 hover:text-[var(--primary)] text-xs transition p-1"><i class="fas fa-edit"></i> تعديل</button>
+                        </div>
+                        <div class="w-10 h-0.5 bg-gradient-to-r from-[var(--primary)] to-slate-400 rounded-full mb-2"></div>
+                        <div id="about-text-container" class="space-y-1.5 text-slate-600 leading-relaxed text-xs"></div>
+                    </div>
+                    
+                    <!-- المهارات -->
+                    <div class="space-y-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h3 class="text-base font-bold text-slate-800">المهارات والتقنيات</h3>
+                            <form id="add-skill-form" class="hidden items-center gap-1">
+                                <input type="text" id="skill-input" placeholder="مهارة جديدة..." required class="px-2 py-1 text-[11px] border border-slate-200 rounded focus:outline-none focus:border-[var(--primary)] max-w-[120px]">
+                                <button type="submit" class="bg-[var(--primary)] text-white px-2 py-1 rounded text-[11px] font-bold hover:bg-[var(--primary-hover)] transition"><i class="fas fa-plus"></i></button>
+                            </form>
+                        </div>
+                        <div id="skills-container" class="flex flex-wrap gap-1.5 pt-0.5"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-12 bg-slate-50/50 border-t border-slate-100">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <span class="w-2.5 h-6 bg-[#800020] rounded-sm inline-block"></span>
+                            مشاريعي وأبرز أعمالي
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">عرض مفصل لأبرز الأنظمة والتطبيقات التي قمت بتبنيها وتطويرها</p>
+                    </div>
+                    <div id="admin-add-project-wrapper"></div>
+                </div>
+
+                <div id="projects-list" class="space-y-6"></div>
+            </div>
+        </section>
+
+        <!-- Certificates Section -->
+        <section id="certificates" class="py-6 px-6 relative">
+            <div class="max-w-7xl mx-auto relative z-10">
+                <div class="text-center mb-4">
+                    <h2 class="text-lg sm:text-xl font-bold mb-0.5">📜 شهادات التقدير والدورات</h2>
+                    <p class="text-slate-500 text-[10px]">اضغط على الصورة لتكبيرها، أو استخدم زر الإضافة عند تسجيل دخولك كأدمن</p>
+                    <div class="w-10 h-0.5 bg-gradient-to-r from-[var(--primary)] to-slate-400 rounded-full mx-auto mt-1"></div>
+                </div>
+
+                <div id="certificates-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5"></div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-6 px-6 bg-[#FDF5F6] border-t border-slate-100">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-lg sm:text-xl font-bold mb-1">📫 تواصل معي</h2>
+                <p class="text-slate-500 text-[10px] sm:text-xs mb-3">يسعدني دائماً تواصلك واستقبال استفساراتك</p>
+                <div id="contact-links" class="flex flex-wrap justify-center gap-1.5 mb-3"></div>
+                <div class="p-3 bg-white rounded-lg border border-slate-100 shadow-sm max-w-xs mx-auto">
+                    <p class="text-slate-400 text-[10px] mb-0.5">البريد الإلكتروني المباشر</p>
+                    <a href="mailto:abdallhali03406391@gmail.com" class="text-[var(--primary)] hover:text-[var(--primary-hover)] transition text-sm font-bold">
+                       abdallhali03406391@gmail.com
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ━━━ 3. الفوتر (Footer) ━━━ -->
+    <footer class="border-t border-red-950 bg-[var(--primary)] py-3 px-6 text-white">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[10px] text-pink-100">
+            <p>© 2026 جميع الحقوق محفوظة</p>
+            <p>صُنع بـ ❤️ باستخدام تقنيات حديثة</p>
+        </div>
+    </footer>
+
+    <!-- ━━━ 4. النوافذ المنبثقة (Modals) ━━━ -->
+
+    <!-- Lightbox Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <button id="close-modal" class="absolute top-4 right-4 text-white text-3xl font-bold">&times;</button>
+        <img id="modal-img" src="" alt="صورة الشهادة كاملة" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl">
+    </div>
+
+    <!-- Add Certificate Modal -->
+    <div id="add-cert-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 animate-in fade-in duration-200">
+            <div class="bg-[var(--primary)] p-4 text-white flex justify-between items-center">
+                <h3 class="text-sm font-bold"><i class="fas fa-plus-circle ml-1.5"></i>إضافة شهادة جديدة للبورتفوليو</h3>
+                <button id="close-add-modal" class="text-white hover:text-pink-200 text-2xl font-bold">&times;</button>
+            </div>
+            <form id="add-cert-form" class="p-5 space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">عنوان الشهادة أو الدورة</label>
+                    <input type="text" id="cert-title" required placeholder="مثال: CCNA 200-301" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--primary)]">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">المنصة المانحة</label>
+                        <input type="text" id="cert-platform" required placeholder="مثال: Cisco, NTI" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--primary)]">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">سنة الحصول عليها</label>
+                        <input type="text" id="cert-date" required placeholder="مثال: 2026" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--primary)]">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">التصنيف</label>
+                    <input type="text" id="cert-category" required placeholder="مثال: شبكات، IT، فرونت إند" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--primary)]">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">رابط صورة الشهادة (Direct URL)</label>
+                    <input type="url" id="cert-img-url" required placeholder="https://i.postimg.cc/..." class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[var(--primary)]">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" id="cancel-add" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold hover:bg-slate-200 transition">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-[var(--primary)] text-white rounded-lg font-bold hover:bg-[var(--primary-hover)] transition">إضافة وحفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Project Modal -->
+    <div id="add-project-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-t-4 border-[#800020]">
+            <button id="close-project-modal" class="absolute top-3 left-3 text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-folder-plus text-[#800020]"></i> إضافة مشروع جديد
+            </h3>
+            <form id="add-project-form" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">عنوان المشروع:</label>
+                    <input type="text" id="project-title" required placeholder="مثال: نظام إدارة عيادة أسنان" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#800020]/20 border-slate-200">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">نوع الميديا:</label>
+                        <select id="project-media-type" class="w-full px-3 py-2 border rounded-lg focus:outline-none border-slate-200 bg-white">
+                            <option value="image">صورة (Image)</option>
+                            <option value="video">فيديو (Video / MP4)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">رابط الميديا المباشر:</label>
+                        <input type="url" id="project-media-url" required placeholder="https://..." class="w-full px-3 py-2 border rounded-lg focus:outline-none border-slate-200">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">وصف المشروع:</label>
+                    <textarea id="project-desc" rows="3" required placeholder="شرح تفصيلي للتقنيات والخدمات..." class="w-full px-3 py-2 border rounded-lg focus:outline-none border-slate-200 resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">التقنيات (افصل بينها بفاصلة):</label>
+                    <input type="text" id="project-tags" placeholder="HTML, CSS, JS, C++" class="w-full px-3 py-2 border rounded-lg focus:outline-none border-slate-200">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">رابط المعاينة (Demo):</label>
+                        <input type="url" id="project-demo" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg focus:outline-none border-slate-200">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">رابط الكود (GitHub):</label>
+                        <input type="url" id="project-github" placeholder="https://github.com/..." class="w-full px-3 py-2 border rounded-lg focus:outline-none border-slate-200">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" id="cancel-project-add" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition font-bold">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-[#800020] text-white rounded-lg hover:bg-[#600018] transition font-bold shadow-md">حفظ المشروع</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ━━━ 5. السكربتات ━━━ -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    
+    <!-- سكربت تجميع القائمة في الموبايل -->
+    <script>
+        document.getElementById('menu-toggle')?.addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) {
+                mobileMenu.classList.toggle('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
