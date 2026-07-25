@@ -21,10 +21,10 @@ const navItems = [
     { label: "تواصل", href: "#contact" }
 ];
 
- const socialLinks = [
+const socialLinks = [
     { label: "GitHub", icon: "fab fa-github", url: "https://github.com/abdallhali03406391-cmyk" },
     { label: "Facebook", icon: "fab fa-facebook-f", url: "https://www.facebook.com/share/1AXuipkZiA/" },
-    { label: "Email", icon: "fas fa-envelope", url: "mailto:abdallhali03406391@gmail.com " }
+    { label: "Email", icon: "fas fa-envelope", url: "mailto:abdallhali03406391@gmail.com" }
 ];
 
 // ━━━ 4. إدارة مصادقة الأدمن (Supabase Auth) ━━━
@@ -41,6 +41,15 @@ async function loginAsAdmin(email, password) {
         alert("✅ تم تسجيل الدخول كـ الأدمن بنجاح!");
         location.reload();
     }
+}
+
+function triggerAdminLogin() {
+    const email = prompt("أدخل البريد الإلكتروني للأدمن:");
+    if (!email) return;
+    const password = prompt("أدخل كلمة السر:");
+    if (!password) return;
+    
+    loginAsAdmin(email, password);
 }
 
 async function logoutAdmin() {
@@ -87,6 +96,22 @@ async function fetchCertificates() {
     } catch(e) { console.error("Certificates fetch error:", e); }
     const certGrid = document.getElementById("certificates-grid");
     if (certGrid) certGrid.innerHTML = renderCertificates(certificates);
+}
+
+// 📸 جلب رابط الصورة الشخصية المرفوعة في Supabase
+async function fetchAvatar() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('profile')
+            .select('avatar_url')
+            .eq('id', 1)
+            .single();
+
+        const avatarImg = document.getElementById("user-avatar");
+        if (!error && data && data.avatar_url && avatarImg) {
+            avatarImg.src = data.avatar_url;
+        }
+    } catch(e) { console.error("Avatar fetch error:", e); }
 }
 
 // ━━━ 6. دالات بناء الواجهات (Render Functions) ━━━
@@ -275,35 +300,67 @@ document.addEventListener("DOMContentLoaded", async function() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     isAdmin = user !== null;
 
-    // 📸 --- إدارة وتغيير الصورة الشخصية ---
+    // 📸 --- إدارة وتغيير الصورة الشخصية عبر Supabase Storage ---
     const avatarImg = document.getElementById("user-avatar");
     const changeAvatarBtn = document.getElementById("change-avatar-btn");
     const avatarInput = document.getElementById("avatar-input");
 
-    // أ- استرجاع الصورة المحفوظة في الميثود/المتصفح
-    const savedAvatar = localStorage.getItem("custom_user_avatar");
-    if (savedAvatar && avatarImg) {
-        avatarImg.src = savedAvatar;
-    }
+    // أ- جلب الصورة المحفوظة
+    fetchAvatar();
 
-    // ب- إظهار زرار التغيير للأدمن فقط
+    // ب- إظهار زر التغيير للأدمن فقط
     if (isAdmin && changeAvatarBtn) {
         changeAvatarBtn.classList.remove("hidden");
     }
 
-    // ج- رفع وتحويل الصورة الجديدة عند اختيار ملف
+    // ج- رفع الصورة مباشرة إلى Supabase Storage
     if (avatarInput) {
-        avatarInput.addEventListener("change", function(e) {
+        avatarInput.addEventListener("change", async function(e) {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const newImageUrl = event.target.result;
-                    if (avatarImg) avatarImg.src = newImageUrl;
-                    localStorage.setItem("custom_user_avatar", newImageUrl);
-                    alert("✅ تم تحديث الصورة الشخصية بنجاح!");
-                };
-                reader.readAsDataURL(file);
+            if (!file) return;
+
+            const originalText = changeAvatarBtn.innerHTML;
+            changeAvatarBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري الرفع...`;
+            changeAvatarBtn.style.pointerEvents = "none";
+
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `avatar_${Date.now()}.${fileExt}`;
+
+                // 1. رفع الملف إلى profile_photo bucket
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('profile_photo')
+                    .upload(fileName, file, { upsert: true });
+
+                if (uploadError) throw uploadError;
+
+                // 2. الحصول على الرابط العام للصورة
+                const { data: urlData } = supabaseClient
+                    .storage
+                    .from('profile_photo')
+                    .getPublicUrl(fileName);
+
+                const publicUrl = urlData.publicUrl;
+
+                // 3. حفظ الرابط في جدول profile ليعتمد عند الجميع
+                const { error: dbError } = await supabaseClient
+                    .from('profile')
+                    .upsert({ id: 1, avatar_url: publicUrl });
+
+                if (dbError) throw dbError;
+
+                // 4. تحديث الصورة في الواجهة
+                if (avatarImg) avatarImg.src = publicUrl;
+                alert("✅ تم رفع الصورة وتحديثها بنجاح وستظهر لكل الزوار على جميع الأجهزة!");
+
+            } catch (err) {
+                console.error(err);
+                alert("⚠️ حدث خطأ أثناء رفع الصورة: " + err.message);
+            } finally {
+                changeAvatarBtn.innerHTML = originalText;
+                changeAvatarBtn.style.pointerEvents = "auto";
+                avatarInput.value = "";
             }
         });
     }
