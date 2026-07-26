@@ -113,7 +113,52 @@
                 </div>
             </div>
         </section>
+        <!-- Courses Section (قسم الكورسات والتدريبات) -->
+        <section id="courses-section" class="py-8 px-6 bg-white border-b border-slate-100">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col-reverse lg:flex-row items-stretch gap-6 bg-[#800020]/5 p-6 rounded-2xl border border-[#800020]/15 shadow-sm">
+                    
+                    <!-- محتوى الكورسات (على اليمين) -->
+                    <div class="flex-1 w-full space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#800020]/10 pb-3">
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                                    <span class="w-2 h-5 bg-[#800020] rounded-sm inline-block"></span>
+                                    🎓 الكورسات والتدريبات الحاصل عليها
+                                </h2>
+                                <p class="text-[11px] text-slate-500 mt-0.5">سجل كامل بالدورات التدريبية المعتمدة والمسارات التعليمية</p>
+                            </div>
+                            
+                            <!-- فورمة إضافة كورس جديد (تظهر للأدمن فقط) -->
+                            <form id="add-course-form" class="hidden flex-wrap items-center gap-1.5">
+                                <input type="text" id="course-name-input" placeholder="اسم الكورس..." required class="px-2.5 py-1 text-[11px] border border-[#800020]/20 rounded-lg focus:outline-none focus:border-[#800020] max-w-[140px] bg-white">
+                                <input type="text" id="course-issuer-input" placeholder="الجهة (مثل Cisco)..." class="px-2.5 py-1 text-[11px] border border-[#800020]/20 rounded-lg focus:outline-none focus:border-[#800020] max-w-[120px] bg-white">
+                                <button type="submit" id="submit-course-btn" class="bg-[#800020] text-white px-3 py-1 rounded-lg text-[11px] font-bold hover:bg-[#600018] transition flex items-center gap-1 shadow-sm">
+                                    <i class="fas fa-plus"></i> إضافة
+                                </button>
+                            </form>
+                        </div>
 
+                        <!-- الحاوية التي تعرض الكورسات -->
+                        <div id="courses-container" class="flex flex-wrap gap-2.5 pt-1">
+                            <!-- سيتم التوليد تلقائياً بواسطة JS -->
+                        </div>
+                    </div>
+
+                    <!-- الصورة الجانبية (على الشمال) -->
+                    <div class="flex-shrink-0 relative group flex flex-col items-center justify-center self-center">
+                        <img id="courses-side-img" src="images/courses-banner.jpg" alt="الكورسات والتدريبات" class="w-36 h-44 lg:w-44 lg:h-52 rounded-xl object-cover shadow-md border-2 border-[#800020]/20">
+                        
+                        <!-- زر تغيير الصورة (يظهر للأدمن فقط) -->
+                        <label id="change-courses-img-btn" for="courses-img-input" class="hidden absolute bottom-2 bg-[#800020] text-white text-[10px] px-2 py-1 rounded-md shadow-md cursor-pointer hover:bg-[#600018] transition flex items-center gap-1 z-10">
+                            <i class="fas fa-camera"></i> تغيير الصورة
+                        </label>
+                        <input type="file" id="courses-img-input" accept="image/*" class="hidden">
+                    </div>
+
+                </div>
+            </div>
+        </section>
         <!-- Projects Section -->
         <section id="projects" class="py-12 bg-slate-50/50 border-t border-slate-100">
             <div class="max-w-6xl mx-auto px-4">
