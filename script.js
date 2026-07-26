@@ -9,6 +9,7 @@ let isAdmin = false;
 
 let aboutText = `<p>طالب في كلية الحاسبات والمعلومات (قسم IT) جامعة قنا.</p>`;
 let skills = [];
+let courses = [];
 let projects = [];
 let certificates = [];
 
@@ -16,6 +17,7 @@ let certificates = [];
 const navItems = [
     { label: "الرئيسية", href: "#hero" },
     { label: "عني", href: "#about" },
+    { label: "الكورسات", href: "#courses-section" },
     { label: "المشاريع", href: "#projects" },
     { label: "الشهادات", href: "#certificates" },
     { label: "تواصل", href: "#contact" }
@@ -24,7 +26,7 @@ const navItems = [
 const socialLinks = [
     { label: "GitHub", icon: "fab fa-github", url: "https://github.com/abdallhali03406391-cmyk" },
     { label: "Facebook", icon: "fab fa-facebook-f", url: "https://www.facebook.com/share/1AXuipkZiA/" },
-    { label: "Email", icon: "fas fa-envelope", url: "mailto:abdallhali03406391@gmail.com" }
+    { label: "Email", icon: "mailto:abdallhali03406391@gmail.com" }
 ];
 
 // ━━━ 4. إدارة مصادقة الأدمن (Supabase Auth) ━━━
@@ -78,6 +80,32 @@ async function fetchSkills() {
     } catch(e) { console.error("Skills fetch error:", e); }
     const skillsContainer = document.getElementById("skills-container");
     if (skillsContainer) skillsContainer.innerHTML = renderSkills(skills);
+}
+
+// 🎓 جلب قائمة الكورسات
+async function fetchCourses() {
+    try {
+        const { data, error } = await supabaseClient.from('courses').select('*');
+        if (!error && data) courses = data;
+    } catch(e) { console.error("Courses fetch error:", e); }
+    const coursesContainer = document.getElementById("courses-container");
+    if (coursesContainer) coursesContainer.innerHTML = renderCourses(courses);
+}
+
+// 🖼️ جلب الصورة الجانبية لقسم الكورسات
+async function fetchCoursesSideImg() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('profile')
+            .select('courses_side_img')
+            .eq('id', 1)
+            .single();
+
+        const coursesImg = document.getElementById("courses-side-img");
+        if (!error && data && data.courses_side_img && coursesImg) {
+            coursesImg.src = data.courses_side_img;
+        }
+    } catch(e) { console.error("Courses image fetch error:", e); }
 }
 
 async function fetchProjects() {
@@ -138,6 +166,24 @@ function renderSkills(items) {
             <i class="fas fa-check text-[9px] text-[#800020]"></i> ${s.name}
             ${isAdmin ? `<button onclick="deleteSkill('${s.id}')" class="text-red-400 hover:text-red-600 mr-1 text-[11px] font-bold" title="حذف">×</button>` : ''}
         </span>
+    `).join("");
+}
+
+// 🎓 رسم الكورسات مع إضافة التنسيق البرغندي الأنيق
+function renderCourses(items) {
+    if (!items || items.length === 0) {
+        return `<div class="text-xs text-slate-400 py-2">لا توجد كورسات مضافة حتى الآن.</div>`;
+    }
+
+    return items.map((c) => `
+        <div class="px-3 py-1.5 bg-[#800020]/5 border border-[#800020]/20 rounded-lg shadow-sm flex items-center gap-2 hover:bg-[#800020] hover:text-white transition-all duration-300 group">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#800020] group-hover:bg-white transition-colors"></span>
+            <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-slate-800 group-hover:text-white transition-colors">${c.title}</span>
+                ${c.issuer ? `<span class="text-[10px] text-[#800020] group-hover:text-pink-100 font-semibold transition-colors">(${c.issuer})</span>` : ''}
+            </div>
+            ${isAdmin ? `<button onclick="deleteCourse('${c.id}')" class="text-[#800020]/50 hover:text-red-500 group-hover:text-pink-200 mr-1 text-sm font-bold transition opacity-0 group-hover:opacity-100" title="حذف الكورس">×</button>` : ''}
+        </div>
     `).join("");
 }
 
@@ -277,6 +323,15 @@ async function deleteSkill(id) {
     }
 }
 
+// 🎓 حذف كورس
+async function deleteCourse(id) {
+    if (confirm("هل تريد حذف هذا الكورس؟")) {
+        const { error } = await supabaseClient.from('courses').delete().eq('id', id);
+        if (error) alert("خطأ بالحذف: " + error.message);
+        else fetchCourses();
+    }
+}
+
 async function deleteProject(id) {
     if (confirm("هل أنت متأكد من رغبتك في حذف هذا المشروع؟")) {
         const { error } = await supabaseClient.from('projects').delete().eq('id', id);
@@ -379,15 +434,27 @@ document.addEventListener("DOMContentLoaded", async function() {
     const contactLinks = document.getElementById("contact-links");
     if (contactLinks) contactLinks.innerHTML = renderContactLinks(socialLinks);
 
-    // 3. جلب البيانات الأساسية بالتوازي
-    await Promise.all([fetchAbout(), fetchSkills(), fetchProjects(), fetchCertificates()]);
+    // 3. جلب البيانات الأساسية بالتوازي (متضمنة الكورسات والصورة الجانبية)
+    await Promise.all([
+        fetchAbout(), 
+        fetchSkills(), 
+        fetchCourses(), 
+        fetchCoursesSideImg(), 
+        fetchProjects(), 
+        fetchCertificates()
+    ]);
 
     // 4. إظهار واجهات الأدمن
     if (isAdmin) {
         const editAboutBtn = document.getElementById("edit-about-btn");
         const addSkillForm = document.getElementById("add-skill-form");
+        const addCourseForm = document.getElementById("add-course-form");
+        const changeCoursesImgBtn = document.getElementById("change-courses-img-btn");
+
         if (editAboutBtn) editAboutBtn.classList.remove("hidden");
         if (addSkillForm) addSkillForm.classList.remove("hidden");
+        if (addCourseForm) addCourseForm.classList.remove("hidden");
+        if (changeCoursesImgBtn) changeCoursesImgBtn.classList.remove("hidden");
 
         const adminProjectBtnWrapper = document.getElementById("admin-add-project-wrapper");
         if (adminProjectBtnWrapper) {
@@ -428,6 +495,88 @@ document.addEventListener("DOMContentLoaded", async function() {
                     fetchSkills();
                     skillInput.value = "";
                 }
+            }
+        });
+    }
+
+    // 🎓 إضافة كورس جديد
+    const addCourseForm = document.getElementById("add-course-form");
+    if (addCourseForm) {
+        addCourseForm.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById("course-name-input");
+            const issuerInput = document.getElementById("course-issuer-input");
+
+            const courseTitle = nameInput.value.trim();
+            const courseIssuer = issuerInput.value.trim();
+
+            if (courseTitle) {
+                const { error } = await supabaseClient.from('courses').insert([{
+                    title: courseTitle,
+                    issuer: courseIssuer
+                }]);
+
+                if (error) {
+                    alert("خطأ في إضافة الكورس: " + error.message);
+                } else {
+                    fetchCourses();
+                    nameInput.value = "";
+                    issuerInput.value = "";
+                }
+            }
+        });
+    }
+
+    // 🖼️ تغيير الصورة الجانبية لقسم الكورسات ورفعها على Supabase Storage
+    const coursesImgInput = document.getElementById("courses-img-input");
+    const changeCoursesImgBtn = document.getElementById("change-courses-img-btn");
+    const coursesSideImg = document.getElementById("courses-side-img");
+
+    if (coursesImgInput) {
+        coursesImgInput.addEventListener("change", async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const originalText = changeCoursesImgBtn.innerHTML;
+            changeCoursesImgBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري الرفع...`;
+            changeCoursesImgBtn.style.pointerEvents = "none";
+
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `courses_side_${Date.now()}.${fileExt}`;
+
+                // رفع الصورة إلى profile_photo bucket
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('profile_photo')
+                    .upload(fileName, file, { upsert: true });
+
+                if (uploadError) throw uploadError;
+
+                const { data: urlData } = supabaseClient
+                    .storage
+                    .from('profile_photo')
+                    .getPublicUrl(fileName);
+
+                const publicUrl = urlData.publicUrl;
+
+                // تحديث عمود الصورة في جدول profile
+                const { error: dbError } = await supabaseClient
+                    .from('profile')
+                    .upsert({ id: 1, courses_side_img: publicUrl });
+
+                if (dbError) throw dbError;
+
+                if (coursesSideImg) coursesSideImg.src = publicUrl;
+                alert("✅ تم رفع وتحديث صورة قسم الكورسات بنجاح!");
+
+            } catch (err) {
+                console.error(err);
+                alert("⚠️ حدث خطأ أثناء رفع الصورة: " + err.message);
+            } finally {
+                changeCoursesImgBtn.innerHTML = originalText;
+                changeCoursesImgBtn.style.pointerEvents = "auto";
+                coursesImgInput.value = "";
             }
         });
     }
