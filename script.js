@@ -432,68 +432,146 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // إضافة مشروع جديد
+    // ━━━ إضافة مشروع جديد برفع الملف مباشرة للـ Storage ━━━
     const addProjectForm = document.getElementById("add-project-form");
     if (addProjectForm) {
         addProjectForm.addEventListener("submit", async function(e) {
             e.preventDefault();
             
+            const submitBtn = document.getElementById("submit-project-btn");
+            const originalBtnText = submitBtn.innerText;
+            
             const title = document.getElementById("project-title").value;
             const mediaType = document.getElementById("project-media-type").value;
-            const mediaUrl = document.getElementById("project-media-url").value.trim();
+            const fileInput = document.getElementById("project-media-file");
             const desc = document.getElementById("project-desc").value;
             const tags = document.getElementById("project-tags").value;
             const demo = document.getElementById("project-demo").value;
             const github = document.getElementById("project-github").value;
 
-            const { error } = await supabaseClient.from('projects').insert([{
-                title: title,
-                media_type: mediaType,
-                media_url: mediaUrl,
-                description: desc,
-                tags: tags,
-                demo_url: demo,
-                github_url: github
-            }]);
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("يرجى اختيار ملف الميديا من جهازك أولاً!");
+                return;
+            }
 
-            if (error) {
-                alert("⚠️ لم يتم الحفظ! خطأ من الداتابيز: " + error.message);
-            } else {
-                alert("✅ تم حفظ المشروع بنجاح!");
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "جاري رفع الملف...";
+
+                // 1. رفع الملف لـ project_media bucket
+                const fileExt = file.name.split('.').pop();
+                const fileName = `proj_${Date.now()}.${fileExt}`;
+
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('project_media')
+                    .upload(fileName, file);
+
+                if (uploadError) throw uploadError;
+
+                // 2. جلب الرابط العام
+                const { data: urlData } = supabaseClient
+                    .storage
+                    .from('project_media')
+                    .getPublicUrl(fileName);
+
+                const mediaUrl = urlData.publicUrl;
+
+                // 3. حفظ بيانات المشروع بالداتابيز
+                const { error: dbError } = await supabaseClient.from('projects').insert([{
+                    title: title,
+                    media_type: mediaType,
+                    media_url: mediaUrl,
+                    description: desc,
+                    tags: tags,
+                    demo_url: demo,
+                    github_url: github
+                }]);
+
+                if (dbError) throw dbError;
+
+                alert("✅ تم رفع الملف وحفظ المشروع بنجاح!");
                 fetchProjects();
                 addProjectForm.reset();
                 document.getElementById("add-project-modal").classList.add("hidden");
+
+            } catch (err) {
+                console.error(err);
+                alert("⚠️ حدث خطأ أثناء رفع المشروع: " + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
             }
         });
     }
 
-    // إضافة شهادة جديدة
+    // ━━━ إضافة شهادة جديدة برفع الصورة مباشرة للـ Storage ━━━
     const addCertForm = document.getElementById("add-cert-form");
     if (addCertForm) {
         addCertForm.addEventListener("submit", async function(e) {
             e.preventDefault();
             
+            const submitBtn = document.getElementById("submit-cert-btn");
+            const originalBtnText = submitBtn.innerText;
+
             const title = document.getElementById("cert-title").value;
             const platform = document.getElementById("cert-platform").value;
             const date = document.getElementById("cert-date").value;
             const category = document.getElementById("cert-category").value;
-            const imgUrl = document.getElementById("cert-img-url").value.trim();
+            const fileInput = document.getElementById("cert-img-file");
 
-            const { error } = await supabaseClient.from('certificates').insert([{
-                title: title,
-                issuer: platform,
-                date: date,
-                category: category,
-                image_url: imgUrl
-            }]);
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("يرجى اختيار صورة الشهادة من جهازك أولاً!");
+                return;
+            }
 
-            if (error) {
-                alert("⚠️ لم يتم الحفظ! خطأ من الداتابيز: " + error.message);
-            } else {
-                alert("✅ تم حفظ الشهادة بنجاح!");
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "جاري رفع الصورة...";
+
+                // 1. رفع صورة الشهادة إلى Storage
+                const fileExt = file.name.split('.').pop();
+                const fileName = `cert_${Date.now()}.${fileExt}`;
+
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('certificate_images')
+                    .upload(fileName, file);
+
+                if (uploadError) throw uploadError;
+
+                // 2. جلب الرابط العام
+                const { data: urlData } = supabaseClient
+                    .storage
+                    .from('certificate_images')
+                    .getPublicUrl(fileName);
+
+                const imgUrl = urlData.publicUrl;
+
+                // 3. حفظ بيانات الشهادة بالداتابيز
+                const { error: dbError } = await supabaseClient.from('certificates').insert([{
+                    title: title,
+                    issuer: platform,
+                    date: date,
+                    category: category,
+                    image_url: imgUrl
+                }]);
+
+                if (dbError) throw dbError;
+
+                alert("✅ تم رفع صورة الشهادة وحفظها بنجاح!");
                 fetchCertificates();
                 addCertForm.reset();
                 document.getElementById("add-cert-modal").classList.add("hidden");
+
+            } catch (err) {
+                console.error(err);
+                alert("⚠️ حدث خطأ أثناء رفع الشهادة: " + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
             }
         });
     }
