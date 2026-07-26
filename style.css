@@ -138,3 +138,34 @@ body {
         border-right: 3px solid var(--primary);
     }
 }
+/* تكبير عرض وارتفاع الصورة الجانبية لقسم الكورسات */
+#courses-side-img {
+    width: 220px !important;  /* كبّرنا العرض هنا (تقدر تخليه 250px أو أكتر حسب رغبتك) */
+    height: 320px !important; /* الارتفاع ليبقى متناسق مع العرض */
+    object-fit: cover !important;
+    border-radius: 12px;
+}
+
+/* للشاشات الكبيرة (الكمبيوتر واللابتوب) */
+@media (min-width: 1024px) {
+    #courses-side-img {
+        width: 280px !important;  /* زيادة العرض أكتر للشاشات الكبيرة */
+        height: 380px !important;
+    }
+}
+/* 📸 إرجاع الصورة الشخصية مربعة الكادر وتكبير حجمها بنسبة مظبوطة */
+#user-avatar {
+    width: 200px !important;       /* عرض الصورة */
+    height: 240px !important;      /* ارتفاع الصورة (شكل مستطيل/مربع أنيق) */
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;  /* بيمنع مط أو تشويه الصورة نهائياً */
+    border-radius: 12px !important; /* انحناء بسيط جداً للزوايا (لو عايزها حادة تماماً غيرها لـ 0) */
+}
+
+/* للشاشات الكبيرة (Desktop / Laptop) */
+@media (min-width: 1024px) {
+    #user-avatar {
+        width: 210px !important;
+        height: 250px !important;
+    }
