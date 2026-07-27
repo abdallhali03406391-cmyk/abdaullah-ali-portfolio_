@@ -584,7 +584,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // ━━━ تجميع اختيار الصور تراكمياً للمشروع ━━━
+    // ━━━ تجميع اختيار الصور تراكمياً للمشروع وتحديث المعاينة ━━━
     const projectMediaInput = document.getElementById("project-media-file");
     if (projectMediaInput) {
         projectMediaInput.addEventListener("change", function(e) {
@@ -603,19 +603,6 @@ document.addEventListener("DOMContentLoaded", async function() {
             updateSelectedFilesPreview();
             projectMediaInput.value = ""; 
         });
-    }
-
-    function updateSelectedFilesPreview() {
-        let previewContainer = document.getElementById("selected-files-preview");
-        if (!previewContainer && projectMediaInput) {
-            previewContainer = document.createElement("div");
-            previewContainer.id = "selected-files-preview";
-            previewContainer.className = "text-[10px] text-[#800020] font-bold mt-1";
-            projectMediaInput.parentNode.appendChild(previewContainer);
-        }
-        if (previewContainer) {
-            previewContainer.innerText = `تم تحديد: ${selectedProjectFiles.length} ملف/ملفات حتى الآن (حتى 10 صور).`;
-        }
     }
 
     // ━━━ إضافة مشروع جديد مجمع تراكمياً ━━━
@@ -682,8 +669,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                 alert("✅ تم رفع الملفات وحفظ المشروع بنجاح!");
                 
                 selectedProjectFiles = [];
-                const previewContainer = document.getElementById("selected-files-preview");
-                if (previewContainer) previewContainer.innerText = "";
+                updateSelectedFilesPreview();
 
                 fetchProjects();
                 addProjectForm.reset();
@@ -767,7 +753,49 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
 });
 
-// ━━━ 9. إدارة المودالات والنافذة المنبثقة ━━━
+// ━━━ 9. إدارة معاينة الصور وتحديث العرض ━━━
+
+function updateSelectedFilesPreview() {
+    const projectMediaInput = document.getElementById("project-media-file");
+    let previewContainer = document.getElementById("selected-files-preview");
+    
+    if (!previewContainer && projectMediaInput) {
+        previewContainer = document.createElement("div");
+        previewContainer.id = "selected-files-preview";
+        previewContainer.className = "text-[11px] text-[#800020] font-bold mt-2 bg-[#800020]/5 p-2 rounded-lg border border-[#800020]/20 flex flex-col gap-1";
+        projectMediaInput.parentNode.appendChild(previewContainer);
+    }
+    
+    if (previewContainer) {
+        if (selectedProjectFiles.length === 0) {
+            previewContainer.innerHTML = `<span class="text-slate-400 font-normal">لم يتم تحديد أي صور حتى الآن.</span>`;
+        } else {
+            const fileNames = selectedProjectFiles.map((f, i) => `
+                <div class="flex justify-between items-center text-slate-700 font-normal text-[10px] bg-white px-2 py-0.5 rounded border border-slate-200">
+                    <span class="truncate">📷 صورة ${i+1}: ${f.name}</span>
+                </div>
+            `).join('');
+
+            previewContainer.innerHTML = `
+                <div class="flex justify-between items-center border-b border-[#800020]/10 pb-1 mb-1">
+                    <span>تم تحديد (${selectedProjectFiles.length} من 10 صور):</span>
+                    <button type="button" onclick="resetSelectedProjectFiles()" class="text-red-500 hover:underline text-[10px] font-bold">مسح وتحديد من جديد</button>
+                </div>
+                <div class="max-h-24 overflow-y-auto flex flex-col gap-1">
+                    ${fileNames}
+                </div>
+            `;
+        }
+    }
+}
+
+// دالة تفريغ المرفقات والبدء من جديد
+window.resetSelectedProjectFiles = function() {
+    selectedProjectFiles = [];
+    updateSelectedFilesPreview();
+};
+
+// ━━━ 10. إدارة المودالات والنافذة المنبثقة ━━━
 
 function openLightbox(imgUrl) {
     const modal = document.getElementById("image-modal");
@@ -783,8 +811,7 @@ document.addEventListener("click", function(e) {
     if (e.target.closest("#close-project-modal") || e.target.closest("#cancel-project-add")) {
         document.getElementById("add-project-modal").classList.add("hidden");
         selectedProjectFiles = [];
-        const previewContainer = document.getElementById("selected-files-preview");
-        if (previewContainer) previewContainer.innerText = "";
+        updateSelectedFilesPreview();
     }
 
     if (e.target.closest("#trigger-add-modal")) {
