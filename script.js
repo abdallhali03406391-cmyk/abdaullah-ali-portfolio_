@@ -162,14 +162,14 @@ function renderSocial(items) {
 
 function renderSkills(items) {
     return items.map((s) => `
-        <span class="skill-tag px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-700 shadow-sm flex items-center gap-1 relative group">
+        <span class="skill-tag px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-700 shadow-sm flex items-center gap-1 relative group bg-slate-100">
             <i class="fas fa-check text-[9px] text-[#800020]"></i> ${s.name}
             ${isAdmin ? `<button onclick="deleteSkill('${s.id}')" class="text-red-400 hover:text-red-600 mr-1 text-[11px] font-bold" title="حذف">×</button>` : ''}
         </span>
     `).join("");
 }
 
-// 🎓 رسم الكورسات مع إضافة التنسيق البرغندي الأنيق
+// 🎓 رسم الكورسات
 function renderCourses(items) {
     if (!items || items.length === 0) {
         return `<div class="text-xs text-slate-400 py-2">لا توجد كورسات مضافة حتى الآن.</div>`;
@@ -187,6 +187,7 @@ function renderCourses(items) {
     `).join("");
 }
 
+// ━━━ دالة رسم المشاريع المعدلة (تتحكم في مصفوفة الصور المعادة من SQL ARRAY) ━━━
 function renderProjects(items) {
     if (!items || items.length === 0) {
         return `<div class="text-center text-slate-400 py-8 bg-white rounded-xl border border-dashed border-slate-200 text-xs">لا توجد مشاريع مضافة حتى الآن.</div>`;
@@ -194,7 +195,14 @@ function renderProjects(items) {
 
     return items.map((proj, index) => {
         const tagsList = proj.tags ? proj.tags.split(',').map(t => t.trim()) : [];
-        const mediaUrls = proj.media_url ? proj.media_url.split(',').map(u => u.trim()) : [];
+        
+        let mediaUrls = [];
+        if (Array.isArray(proj.media_url)) {
+            mediaUrls = proj.media_url;
+        } else if (typeof proj.media_url === 'string' && proj.media_url.trim() !== '') {
+            mediaUrls = proj.media_url.split(',').map(u => u.trim());
+        }
+
         const mainMedia = mediaUrls[0] || '';
         
         let mediaHtml = "";
@@ -207,17 +215,17 @@ function renderProjects(items) {
                 </video>`;
         } else {
             mediaHtml = `
-                <div class="w-full h-full flex flex-col gap-1.5">
-                    <div class="w-full flex-1 overflow-hidden rounded-lg bg-slate-100 relative group">
-                        <img src="${mainMedia}" alt="${proj.title}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-500" onclick="openLightbox('${mainMedia}')">
+                <div class="w-full h-full flex flex-col gap-2">
+                    <div class="w-full flex-1 overflow-hidden rounded-lg bg-slate-100 relative group min-h-[160px]">
+                        <img id="main-project-img-${proj.id}" src="${mainMedia}" alt="${proj.title}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-500" onclick="openLightbox(this.src)">
                     </div>
                     
                     ${mediaUrls.length > 1 ? `
-                        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-h-12">
+                        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-h-14">
                             ${mediaUrls.map((url, imgIndex) => `
                                 <img src="${url}" alt="صورة ${imgIndex + 1}" 
-                                     class="w-10 h-10 object-cover rounded-md border border-slate-200 cursor-pointer hover:opacity-80 transition shrink-0" 
-                                     onclick="openLightbox('${url}')">
+                                     class="w-10 h-10 object-cover rounded-md border-2 border-slate-200 hover:border-[#800020] cursor-pointer transition shrink-0" 
+                                     onclick="changeMainProjectImage('${proj.id}', '${url}')">
                             `).join('')}
                         </div>
                     ` : ''}
@@ -233,17 +241,18 @@ function renderProjects(items) {
             </button> ` : ''}
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-3.5 items-center">
-                <div class="md:col-span-4 h-48 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 relative flex items-center justify-center p-1">
+                <div class="md:col-span-5 min-h-[220px] rounded-lg overflow-hidden bg-slate-100 border border-slate-200 relative flex items-center justify-center p-1">
                     ${mediaHtml}
                 </div>
 
-                <div class="md:col-span-8 flex flex-col justify-between h-full space-y-2">
+                <div class="md:col-span-7 flex flex-col justify-between h-full space-y-2">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="bg-[#800020]/10 text-[#800020] font-bold text-[9px] px-2 py-0.5 rounded-full">مشروع #${index + 1}</span>
+                            ${mediaUrls.length > 1 ? `<span class="bg-slate-100 text-slate-600 font-bold text-[9px] px-2 py-0.5 rounded-full">📷 ${mediaUrls.length} صور</span>` : ''}
                         </div>
                         <h3 class="text-sm font-bold text-slate-800 hover:text-[#800020] transition">${proj.title}</h3>
-                        <p class="text-[11px] text-slate-600 leading-relaxed mt-1 line-clamp-2">${proj.description}</p>
+                        <p class="text-[11px] text-slate-600 leading-relaxed mt-1 line-clamp-3">${proj.description}</p>
                     </div>
 
                     <div class="flex flex-wrap gap-1 pt-1.5 border-t border-slate-100">
@@ -260,13 +269,21 @@ function renderProjects(items) {
     }).join("");
 }
 
+// تغيير الصورة الرئيسية من الكروت المصغرة
+function changeMainProjectImage(projId, newUrl) {
+    const mainImg = document.getElementById(`main-project-img-${projId}`);
+    if (mainImg) {
+        mainImg.src = newUrl;
+    }
+}
+
 function renderCertificates(items) {
     let html = "";
     if (items && items.length > 0) {
         html += items.map((cert, index) => `
-            <article class="cert-card rounded-lg overflow-hidden relative">
+            <article class="cert-card rounded-lg overflow-hidden relative bg-white border border-slate-200">
                 ${isAdmin ? `
-                <button class="delete-cert-btn absolute top-2 left-2 z-20 w-6 h-6 rounded-full flex items-center justify-center text-red-500 shadow-md" title="حذف الشهادة" onclick="deleteCertificate('${cert.id}')">
+                <button class="delete-cert-btn absolute top-2 left-2 z-20 w-6 h-6 rounded-full flex items-center justify-center text-red-500 bg-white/80 shadow-md" title="حذف الشهادة" onclick="deleteCertificate('${cert.id}')">
                     <i class="fas fa-trash-alt text-[10px]"></i>
                 </button> ` : ''}
 
@@ -276,7 +293,7 @@ function renderCertificates(items) {
                 
                 <div class="p-2 flex flex-col justify-between flex-grow">
                     <div class="flex items-center justify-between gap-1">
-                        <span class="badge px-1.5 py-0.1 rounded text-[8px] font-bold">${cert.category || 'عام'}</span>
+                        <span class="badge bg-[#800020]/10 text-[#800020] px-1.5 py-0.1 rounded text-[8px] font-bold">${cert.category || 'عام'}</span>
                         <span class="text-[8px] text-slate-400 font-bold">#${index + 1}</span>
                     </div>
                     <h3 class="text-xs font-bold text-slate-800 line-clamp-1">${cert.title}</h3>
@@ -306,7 +323,7 @@ function renderCertificates(items) {
 
 function renderContactLinks(items) {
     return items.map(s => `
-        <a href="${s.url}" target="_blank" class="social-icon-public flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm">
+        <a href="${s.url}" target="_blank" class="social-icon-public flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm bg-white border border-slate-200 hover:bg-[#800020] hover:text-white transition">
             <i class="${s.icon} text-xs"></i>
             <span class="text-[10px] font-bold">${s.label}</span>
         </a>
@@ -323,7 +340,6 @@ async function deleteSkill(id) {
     }
 }
 
-// 🎓 حذف كورس
 async function deleteCourse(id) {
     if (confirm("هل تريد حذف هذا الكورس؟")) {
         const { error } = await supabaseClient.from('courses').delete().eq('id', id);
@@ -351,24 +367,19 @@ async function deleteCertificate(id) {
 // ━━━ 8. الأحداث الرئيسية وعمليات الإضافة عند تحميل الصفحة ━━━
 
 document.addEventListener("DOMContentLoaded", async function() {
-    // 1. التحقق من جلسة الأدمن
     const { data: { user } } = await supabaseClient.auth.getUser();
     isAdmin = user !== null;
 
-    // 📸 --- إدارة وتغيير الصورة الشخصية عبر Supabase Storage ---
     const avatarImg = document.getElementById("user-avatar");
     const changeAvatarBtn = document.getElementById("change-avatar-btn");
     const avatarInput = document.getElementById("avatar-input");
 
-    // أ- جلب الصورة المحفوظة
     fetchAvatar();
 
-    // ب- إظهار زر التغيير للأدمن فقط
     if (isAdmin && changeAvatarBtn) {
         changeAvatarBtn.classList.remove("hidden");
     }
 
-    // ج- رفع الصورة مباشرة إلى Supabase Storage
     if (avatarInput) {
         avatarInput.addEventListener("change", async function(e) {
             const file = e.target.files[0];
@@ -382,7 +393,6 @@ document.addEventListener("DOMContentLoaded", async function() {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `avatar_${Date.now()}.${fileExt}`;
 
-                // 1. رفع الملف إلى profile_photo bucket
                 const { data: uploadData, error: uploadError } = await supabaseClient
                     .storage
                     .from('profile_photo')
@@ -390,7 +400,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                 if (uploadError) throw uploadError;
 
-                // 2. الحصول على الرابط العام للصورة
                 const { data: urlData } = supabaseClient
                     .storage
                     .from('profile_photo')
@@ -398,16 +407,14 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                 const publicUrl = urlData.publicUrl;
 
-                // 3. حفظ الرابط في جدول profile ليعتمد عند الجميع
                 const { error: dbError } = await supabaseClient
                     .from('profile')
                     .upsert({ id: 1, avatar_url: publicUrl });
 
                 if (dbError) throw dbError;
 
-                // 4. تحديث الصورة في الواجهة
                 if (avatarImg) avatarImg.src = publicUrl;
-                alert("✅ تم رفع الصورة وتحديثها بنجاح وستظهر لكل الزوار على جميع الأجهزة!");
+                alert("✅ تم رفع الصورة وتحديثها بنجاح!");
 
             } catch (err) {
                 console.error(err);
@@ -420,7 +427,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // 2. بناء عناصر القوائم
     const desktopNav = document.getElementById("desktop-nav");
     const mobileNavList = document.getElementById("mobile-nav-list");
     if (desktopNav) desktopNav.innerHTML = renderNav(navItems);
@@ -434,7 +440,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     const contactLinks = document.getElementById("contact-links");
     if (contactLinks) contactLinks.innerHTML = renderContactLinks(socialLinks);
 
-    // 3. جلب البيانات الأساسية بالتوازي (متضمنة الكورسات والصورة الجانبية)
     await Promise.all([
         fetchAbout(), 
         fetchSkills(), 
@@ -444,7 +449,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         fetchCertificates()
     ]);
 
-    // 4. إظهار واجهات الأدمن
     if (isAdmin) {
         const editAboutBtn = document.getElementById("edit-about-btn");
         const addSkillForm = document.getElementById("add-skill-form");
@@ -466,7 +470,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     }
 
-    // تعديل نبذة عني
     const editAboutBtn = document.getElementById("edit-about-btn");
     if (editAboutBtn) {
         editAboutBtn.addEventListener("click", async function() {
@@ -481,7 +484,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // إضافة مهارة
     const addSkillForm = document.getElementById("add-skill-form");
     if (addSkillForm) {
         addSkillForm.addEventListener("submit", async function(e) {
@@ -499,7 +501,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // 🎓 إضافة كورس جديد
     const addCourseForm = document.getElementById("add-course-form");
     if (addCourseForm) {
         addCourseForm.addEventListener("submit", async function(e) {
@@ -527,7 +528,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // 🖼️ تغيير الصورة الجانبية لقسم الكورسات ورفعها على Supabase Storage
     const coursesImgInput = document.getElementById("courses-img-input");
     const changeCoursesImgBtn = document.getElementById("change-courses-img-btn");
     const coursesSideImg = document.getElementById("courses-side-img");
@@ -545,7 +545,6 @@ document.addEventListener("DOMContentLoaded", async function() {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `courses_side_${Date.now()}.${fileExt}`;
 
-                // رفع الصورة إلى profile_photo bucket
                 const { data: uploadData, error: uploadError } = await supabaseClient
                     .storage
                     .from('profile_photo')
@@ -560,7 +559,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                 const publicUrl = urlData.publicUrl;
 
-                // تحديث عمود الصورة في جدول profile
                 const { error: dbError } = await supabaseClient
                     .from('profile')
                     .upsert({ id: 1, courses_side_img: publicUrl });
@@ -581,7 +579,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // ━━━ إضافة مشروع جديد برفع الملف مباشرة للـ Storage ━━━
+    // ━━━ إضافة مشروع جديد بفرز ورفع مصفوفة ملفات لـ Supabase ━━━
     const addProjectForm = document.getElementById("add-project-form");
     if (addProjectForm) {
         addProjectForm.addEventListener("submit", async function(e) {
@@ -598,40 +596,50 @@ document.addEventListener("DOMContentLoaded", async function() {
             const demo = document.getElementById("project-demo").value;
             const github = document.getElementById("project-github").value;
 
-            const file = fileInput.files[0];
-            if (!file) {
+            const files = Array.from(fileInput.files);
+            if (files.length === 0) {
                 alert("يرجى اختيار ملف الميديا من جهازك أولاً!");
+                return;
+            }
+
+            if (files.length > 10) {
+                alert("⚠️ يُسمح برفع 10 صور كحد أقصى للمشروع الواحد!");
                 return;
             }
 
             try {
                 submitBtn.disabled = true;
-                submitBtn.innerText = "جاري رفع الملف...";
+                const uploadedUrls = [];
 
-                // 1. رفع الملف لـ project_media bucket
-                const fileExt = file.name.split('.').pop();
-                const fileName = `proj_${Date.now()}.${fileExt}`;
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    submitBtn.innerText = `جاري رفع الملف (${i + 1}/${files.length})...`;
 
-                const { data: uploadData, error: uploadError } = await supabaseClient
-                    .storage
-                    .from('project_media')
-                    .upload(fileName, file);
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `proj_${Date.now()}_${i}.${fileExt}`;
 
-                if (uploadError) throw uploadError;
+                    const { data: uploadData, error: uploadError } = await supabaseClient
+                        .storage
+                        .from('project_media')
+                        .upload(fileName, file);
 
-                // 2. جلب الرابط العام
-                const { data: urlData } = supabaseClient
-                    .storage
-                    .from('project_media')
-                    .getPublicUrl(fileName);
+                    if (uploadError) throw uploadError;
 
-                const mediaUrl = urlData.publicUrl;
+                    const { data: urlData } = supabaseClient
+                        .storage
+                        .from('project_media')
+                        .getPublicUrl(fileName);
 
-                // 3. حفظ بيانات المشروع بالداتابيز
+                    uploadedUrls.push(urlData.publicUrl);
+                }
+
+                submitBtn.innerText = "جاري حفظ بيانات المشروع...";
+
+                // حفظ الـ Array المحدثة لحقل media_url (text[])
                 const { error: dbError } = await supabaseClient.from('projects').insert([{
                     title: title,
                     media_type: mediaType,
-                    media_url: mediaUrl,
+                    media_url: uploadedUrls,
                     description: desc,
                     tags: tags,
                     demo_url: demo,
@@ -640,7 +648,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                 if (dbError) throw dbError;
 
-                alert("✅ تم رفع الملف وحفظ المشروع بنجاح!");
+                alert("✅ تم رفع الملفات وحفظ المشروع بنجاح!");
                 fetchProjects();
                 addProjectForm.reset();
                 document.getElementById("add-project-modal").classList.add("hidden");
@@ -655,7 +663,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // ━━━ إضافة شهادة جديدة برفع الصورة مباشرة للـ Storage ━━━
+    // ━━━ إضافة شهادة جديدة ━━━
     const addCertForm = document.getElementById("add-cert-form");
     if (addCertForm) {
         addCertForm.addEventListener("submit", async function(e) {
@@ -680,7 +688,6 @@ document.addEventListener("DOMContentLoaded", async function() {
                 submitBtn.disabled = true;
                 submitBtn.innerText = "جاري رفع الصورة...";
 
-                // 1. رفع صورة الشهادة إلى Storage
                 const fileExt = file.name.split('.').pop();
                 const fileName = `cert_${Date.now()}.${fileExt}`;
 
@@ -691,7 +698,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                 if (uploadError) throw uploadError;
 
-                // 2. جلب الرابط العام
                 const { data: urlData } = supabaseClient
                     .storage
                     .from('certificate_images')
@@ -699,7 +705,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                 const imgUrl = urlData.publicUrl;
 
-                // 3. حفظ بيانات الشهادة بالداتابيز
                 const { error: dbError } = await supabaseClient.from('certificates').insert([{
                     title: title,
                     issuer: platform,
