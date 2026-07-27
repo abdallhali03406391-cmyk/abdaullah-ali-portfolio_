@@ -13,6 +13,9 @@ let courses = [];
 let projects = [];
 let certificates = [];
 
+// مصفوفة مؤقتة لتجميع الصور المختارة تراكمياً للمشروع
+let selectedProjectFiles = [];
+
 // ━━━ 3. عناصر القوائم والروابط ━━━
 const navItems = [
     { label: "الرئيسية", href: "#hero" },
@@ -82,7 +85,6 @@ async function fetchSkills() {
     if (skillsContainer) skillsContainer.innerHTML = renderSkills(skills);
 }
 
-// 🎓 جلب قائمة الكورسات
 async function fetchCourses() {
     try {
         const { data, error } = await supabaseClient.from('courses').select('*');
@@ -92,7 +94,6 @@ async function fetchCourses() {
     if (coursesContainer) coursesContainer.innerHTML = renderCourses(courses);
 }
 
-// 🖼️ جلب الصورة الجانبية لقسم الكورسات
 async function fetchCoursesSideImg() {
     try {
         const { data, error } = await supabaseClient
@@ -126,7 +127,6 @@ async function fetchCertificates() {
     if (certGrid) certGrid.innerHTML = renderCertificates(certificates);
 }
 
-// 📸 جلب رابط الصورة الشخصية المرفوعة في Supabase
 async function fetchAvatar() {
     try {
         const { data, error } = await supabaseClient
@@ -169,7 +169,6 @@ function renderSkills(items) {
     `).join("");
 }
 
-// 🎓 رسم الكورسات
 function renderCourses(items) {
     if (!items || items.length === 0) {
         return `<div class="text-xs text-slate-400 py-2">لا توجد كورسات مضافة حتى الآن.</div>`;
@@ -187,7 +186,6 @@ function renderCourses(items) {
     `).join("");
 }
 
-// ━━━ دالة رسم المشاريع المعدلة (تتحكم في مصفوفة الصور المعادة من SQL ARRAY) ━━━
 function renderProjects(items) {
     if (!items || items.length === 0) {
         return `<div class="text-center text-slate-400 py-8 bg-white rounded-xl border border-dashed border-slate-200 text-xs">لا توجد مشاريع مضافة حتى الآن.</div>`;
@@ -269,7 +267,6 @@ function renderProjects(items) {
     }).join("");
 }
 
-// تغيير الصورة الرئيسية من الكروت المصغرة
 function changeMainProjectImage(projId, newUrl) {
     const mainImg = document.getElementById(`main-project-img-${projId}`);
     if (mainImg) {
@@ -579,6 +576,40 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
+    // ━━━ تجميع وتخزين اختيار الصور تراكمياً للمشروع ━━━
+    const projectMediaInput = document.getElementById("project-media-file");
+    if (projectMediaInput) {
+        projectMediaInput.addEventListener("change", function(e) {
+            const newFiles = Array.from(e.target.files);
+
+            newFiles.forEach(file => {
+                if (selectedProjectFiles.length < 10) {
+                    selectedProjectFiles.push(file);
+                }
+            });
+
+            if (selectedProjectFiles.length >= 10) {
+                alert("⚠️ وصلت للحد الأقصى (10 صور كحد أقصى للمشروع الواحد)!");
+            }
+
+            updateSelectedFilesPreview();
+            projectMediaInput.value = ""; // تفريغ الـ Input للسماح باختيار ملفات أخرى بدون مسح القديم
+        });
+    }
+
+    function updateSelectedFilesPreview() {
+        let previewContainer = document.getElementById("selected-files-preview");
+        if (!previewContainer && projectMediaInput) {
+            previewContainer = document.createElement("div");
+            previewContainer.id = "selected-files-preview";
+            previewContainer.className = "text-[10px] text-[#800020] font-bold mt-1";
+            projectMediaInput.parentNode.appendChild(previewContainer);
+        }
+        if (previewContainer) {
+            previewContainer.innerText = `تم تحديد: ${selectedProjectFiles.length} ملف/ملفات حتى الآن (حتى 10 صور).`;
+        }
+    }
+
     // ━━━ إضافة مشروع جديد بفرز ورفع مصفوفة ملفات لـ Supabase ━━━
     const addProjectForm = document.getElementById("add-project-form");
     if (addProjectForm) {
@@ -590,20 +621,13 @@ document.addEventListener("DOMContentLoaded", async function() {
             
             const title = document.getElementById("project-title").value;
             const mediaType = document.getElementById("project-media-type").value;
-            const fileInput = document.getElementById("project-media-file");
             const desc = document.getElementById("project-desc").value;
             const tags = document.getElementById("project-tags").value;
             const demo = document.getElementById("project-demo").value;
             const github = document.getElementById("project-github").value;
 
-            const files = Array.from(fileInput.files);
-            if (files.length === 0) {
-                alert("يرجى اختيار ملف الميديا من جهازك أولاً!");
-                return;
-            }
-
-            if (files.length > 10) {
-                alert("⚠️ يُسمح برفع 10 صور كحد أقصى للمشروع الواحد!");
+            if (selectedProjectFiles.length === 0) {
+                alert("يرجى اختيار ملف/ملفات الميديا من جهازك أولاً!");
                 return;
             }
 
@@ -611,9 +635,9 @@ document.addEventListener("DOMContentLoaded", async function() {
                 submitBtn.disabled = true;
                 const uploadedUrls = [];
 
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    submitBtn.innerText = `جاري رفع الملف (${i + 1}/${files.length})...`;
+                for (let i = 0; i < selectedProjectFiles.length; i++) {
+                    const file = selectedProjectFiles[i];
+                    submitBtn.innerText = `جاري رفع الملف (${i + 1}/${selectedProjectFiles.length})...`;
 
                     const fileExt = file.name.split('.').pop();
                     const fileName = `proj_${Date.now()}_${i}.${fileExt}`;
@@ -635,7 +659,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                 submitBtn.innerText = "جاري حفظ بيانات المشروع...";
 
-                // حفظ الـ Array المحدثة لحقل media_url (text[])
                 const { error: dbError } = await supabaseClient.from('projects').insert([{
                     title: title,
                     media_type: mediaType,
@@ -649,6 +672,12 @@ document.addEventListener("DOMContentLoaded", async function() {
                 if (dbError) throw dbError;
 
                 alert("✅ تم رفع الملفات وحفظ المشروع بنجاح!");
+                
+                // إعادة تصفير القائمة التراكمية بعد النجاح
+                selectedProjectFiles = [];
+                const previewContainer = document.getElementById("selected-files-preview");
+                if (previewContainer) previewContainer.innerText = "";
+
                 fetchProjects();
                 addProjectForm.reset();
                 document.getElementById("add-project-modal").classList.add("hidden");
@@ -746,6 +775,10 @@ document.addEventListener("click", function(e) {
     }
     if (e.target.closest("#close-project-modal") || e.target.closest("#cancel-project-add")) {
         document.getElementById("add-project-modal").classList.add("hidden");
+        // تفريغ القائمة عند الإلغاء
+        selectedProjectFiles = [];
+        const previewContainer = document.getElementById("selected-files-preview");
+        if (previewContainer) previewContainer.innerText = "";
     }
 
     if (e.target.closest("#trigger-add-modal")) {
