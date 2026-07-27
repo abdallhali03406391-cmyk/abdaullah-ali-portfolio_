@@ -207,22 +207,28 @@ function renderProjects(items) {
         
         if (proj.media_type === "video") {
             mediaHtml = `
-                <video controls class="w-full h-full object-cover rounded-lg">
-                    <source src="${mainMedia}" type="video/mp4">
-                    متصفحك لا يدعم تشغيل الفيديو.
-                </video>`;
+                <div class="project-media-container rounded-lg overflow-hidden">
+                    <video controls class="w-full h-full object-cover">
+                        <source src="${mainMedia}" type="video/mp4">
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>
+                </div>`;
         } else {
             mediaHtml = `
-                <div class="w-full h-full flex flex-col gap-2">
-                    <div class="w-full flex-1 overflow-hidden rounded-lg bg-slate-100 relative group min-h-[160px]">
-                        <img id="main-project-img-${proj.id}" src="${mainMedia}" alt="${proj.title}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-500" onclick="openLightbox(this.src)">
+                <div class="w-full flex flex-col gap-1.5">
+                    <!-- الصورة الرئيسية بـ CSS fixed height -->
+                    <div class="project-media-container rounded-lg relative group overflow-hidden">
+                        <img id="main-project-img-${proj.id}" src="${mainMedia}" alt="${proj.title}" 
+                             class="cursor-pointer hover:scale-105 transition-transform duration-300" 
+                             onclick="openLightbox(this.src)">
                     </div>
                     
+                    <!-- مصغرات الصور -->
                     ${mediaUrls.length > 1 ? `
-                        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-h-14">
+                        <div class="flex items-center gap-1 overflow-x-auto pb-0.5 max-h-9">
                             ${mediaUrls.map((url, imgIndex) => `
                                 <img src="${url}" alt="صورة ${imgIndex + 1}" 
-                                     class="w-10 h-10 object-cover rounded-md border-2 border-slate-200 hover:border-[#800020] cursor-pointer transition shrink-0" 
+                                     class="project-thumb-img border border-slate-200 hover:border-[#800020] cursor-pointer transition" 
                                      onclick="changeMainProjectImage('${proj.id}', '${url}')">
                             `).join('')}
                         </div>
@@ -231,35 +237,37 @@ function renderProjects(items) {
         }
 
         return `
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden relative group">
+        <div class="project-card-custom bg-white rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden relative group">
             ${isAdmin ? `
             <button class="delete-project-btn absolute top-2.5 left-2.5 z-30 w-6 h-6 rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition flex items-center justify-center" 
                     title="حذف المشروع" onclick="deleteProject('${proj.id}')">
                 <i class="fas fa-trash-alt text-[10px]"></i>
             </button> ` : ''}
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-3.5 items-center">
-                <div class="md:col-span-5 min-h-[220px] rounded-lg overflow-hidden bg-slate-100 border border-slate-200 relative flex items-center justify-center p-1">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 p-3 items-center">
+                <!-- قسم الميديا -->
+                <div class="md:col-span-5 rounded-lg overflow-hidden p-0.5">
                     ${mediaHtml}
                 </div>
 
-                <div class="md:col-span-7 flex flex-col justify-between h-full space-y-2">
+                <!-- تفاصيل المشروع -->
+                <div class="md:col-span-7 flex flex-col justify-between h-full space-y-1.5">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="bg-[#800020]/10 text-[#800020] font-bold text-[9px] px-2 py-0.5 rounded-full">مشروع #${index + 1}</span>
-                            ${mediaUrls.length > 1 ? `<span class="bg-slate-100 text-slate-600 font-bold text-[9px] px-2 py-0.5 rounded-full">📷 ${mediaUrls.length} صور</span>` : ''}
+                            ${mediaUrls.length > 1 ? `<span class="bg-slate-100 text-slate-600 font-bold text-[9px] px-1.5 py-0.5 rounded-full">📷 ${mediaUrls.length} صور</span>` : ''}
                         </div>
-                        <h3 class="text-sm font-bold text-slate-800 hover:text-[#800020] transition">${proj.title}</h3>
-                        <p class="text-[11px] text-slate-600 leading-relaxed mt-1 line-clamp-3">${proj.description}</p>
+                        <h3 class="text-xs font-bold text-slate-800 hover:text-[#800020] transition truncate">${proj.title}</h3>
+                        <p class="text-[10px] text-slate-600 leading-snug mt-1 line-clamp-2">${proj.description}</p>
                     </div>
 
-                    <div class="flex flex-wrap gap-1 pt-1.5 border-t border-slate-100">
-                        ${tagsList.map(tag => `<span class="bg-slate-100 text-slate-700 font-semibold text-[9px] px-1.5 py-0.5 rounded">${tag}</span>`).join('')}
+                    <div class="flex flex-wrap gap-1 pt-1 border-t border-slate-100">
+                        ${tagsList.map(tag => `<span class="bg-slate-100 text-slate-700 font-semibold text-[8px] px-1.5 py-0.5 rounded">${tag}</span>`).join('')}
                     </div>
 
-                    <div class="flex items-center gap-2 pt-1">
-                        ${proj.demo_url ? `<a href="${proj.demo_url}" target="_blank" class="px-3 py-1 bg-[#800020] hover:bg-[#600018] text-white font-bold rounded-md text-[11px] shadow-sm flex items-center gap-1 transition"><i class="fas fa-external-link-alt text-[9px]"></i> معاينة</a>` : ''}
-                        ${proj.github_url ? `<a href="${proj.github_url}" target="_blank" class="px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-md text-[11px] shadow-sm flex items-center gap-1 transition"><i class="fab fa-github text-[10px]"></i> GitHub</a>` : ''}
+                    <div class="flex items-center gap-2 pt-0.5">
+                        ${proj.demo_url ? `<a href="${proj.demo_url}" target="_blank" class="px-2.5 py-0.5 bg-[#800020] hover:bg-[#600018] text-white font-bold rounded text-[10px] shadow-sm flex items-center gap-1 transition"><i class="fas fa-external-link-alt text-[8px]"></i> معاينة</a>` : ''}
+                        ${proj.github_url ? `<a href="${proj.github_url}" target="_blank" class="px-2.5 py-0.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded text-[10px] shadow-sm flex items-center gap-1 transition"><i class="fab fa-github text-[9px]"></i> GitHub</a>` : ''}
                     </div>
                 </div>
             </div>
@@ -576,7 +584,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     }
 
-    // ━━━ تجميع وتخزين اختيار الصور تراكمياً للمشروع ━━━
+    // ━━━ تجميع اختيار الصور تراكمياً للمشروع ━━━
     const projectMediaInput = document.getElementById("project-media-file");
     if (projectMediaInput) {
         projectMediaInput.addEventListener("change", function(e) {
@@ -593,7 +601,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             }
 
             updateSelectedFilesPreview();
-            projectMediaInput.value = ""; // تفريغ الـ Input للسماح باختيار ملفات أخرى بدون مسح القديم
+            projectMediaInput.value = ""; 
         });
     }
 
@@ -610,7 +618,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     }
 
-    // ━━━ إضافة مشروع جديد بفرز ورفع مصفوفة ملفات لـ Supabase ━━━
+    // ━━━ إضافة مشروع جديد مجمع تراكمياً ━━━
     const addProjectForm = document.getElementById("add-project-form");
     if (addProjectForm) {
         addProjectForm.addEventListener("submit", async function(e) {
@@ -673,7 +681,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                 alert("✅ تم رفع الملفات وحفظ المشروع بنجاح!");
                 
-                // إعادة تصفير القائمة التراكمية بعد النجاح
                 selectedProjectFiles = [];
                 const previewContainer = document.getElementById("selected-files-preview");
                 if (previewContainer) previewContainer.innerText = "";
@@ -775,7 +782,6 @@ document.addEventListener("click", function(e) {
     }
     if (e.target.closest("#close-project-modal") || e.target.closest("#cancel-project-add")) {
         document.getElementById("add-project-modal").classList.add("hidden");
-        // تفريغ القائمة عند الإلغاء
         selectedProjectFiles = [];
         const previewContainer = document.getElementById("selected-files-preview");
         if (previewContainer) previewContainer.innerText = "";
