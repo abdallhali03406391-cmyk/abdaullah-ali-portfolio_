@@ -300,7 +300,7 @@ function renderCertificates(items) {
                 </button> ` : ''}
 
                 <div class="w-full h-44 overflow-hidden relative group cursor-pointer" onclick="openLightbox('${cert.image_url}')">
-                      <img src="${cert.image_url}" style="height: 250px !important; width: 100% !important; object-fit: cover !important;">
+                      <img src="${cert.image_url}" style="height: 250px !important; width: 100% !important; object-fit: cover !important;">             
                 </div>
                 
                 <div class="p-2 flex flex-col justify-between flex-grow">
