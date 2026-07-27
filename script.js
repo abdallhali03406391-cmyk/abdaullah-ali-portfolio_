@@ -1,4 +1,4 @@
- // ━━━ 1. إعداد وحساب Supabase ━━━
+   // ━━━ 1. إعداد وحساب Supabase ━━━
 const SUPABASE_URL = "https://udhztdgnuklgqcoywcfq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_SfDX158Kv9094SF-e1VnoA_IrjH4YIY";
 
@@ -185,7 +185,17 @@ function renderCourses(items) {
         </div>
     `).join("");
 }
+ 
 
+ // 1. دالة تغيير الصورة الرئيسية
+function changeMainProjectImage(projId, imageUrl) {
+    const mainImg = document.getElementById(`main-project-img-${projId}`);
+    if (mainImg) {
+        mainImg.src = imageUrl;
+    }
+}
+
+// 2. دالة عرض المشاريع (الصور المصغرة بجانب الصورة الرئيسية)
 function renderProjects(items) {
     if (!items || items.length === 0) {
         return `<div class="text-center text-slate-400 py-8 bg-white rounded-xl border border-dashed border-slate-200 text-xs">لا توجد مشاريع مضافة حتى الآن.</div>`;
@@ -207,79 +217,76 @@ function renderProjects(items) {
         
         if (proj.media_type === "video") {
             mediaHtml = `
-                <div class="project-media-container rounded-lg overflow-hidden">
-                    <video controls class="w-full h-full object-cover">
+                <div class="w-full rounded-lg overflow-hidden bg-slate-100">
+                    <video controls class="w-full h-auto max-h-56 object-cover rounded-lg">
                         <source src="${mainMedia}" type="video/mp4">
                         متصفحك لا يدعم تشغيل الفيديو.
                     </video>
                 </div>`;
         } else {
             mediaHtml = `
-                <div class="w-full flex flex-col gap-1.5">
-                    <!-- الصورة الرئيسية بـ CSS fixed height -->
-                    <div class="project-media-container rounded-lg relative group overflow-hidden">
-                        <img id="main-project-img-${proj.id}" src="${mainMedia}" alt="${proj.title}" 
-                             class="cursor-pointer hover:scale-105 transition-transform duration-300" 
-                             onclick="openLightbox(this.src)">
-                    </div>
+                <!-- حاوية تجمع الصورة الرئيسية والمصغرات بجانب بعض -->
+                <div class="w-full flex flex-row gap-2 items-start">
                     
-                    <!-- مصغرات الصور -->
+                    <!-- الصور المصغرة في عمود رأسي (على الجانب) -->
                     ${mediaUrls.length > 1 ? `
-                        <div class="flex items-center gap-1 overflow-x-auto pb-0.5 max-h-9">
+                        <div class="flex flex-col gap-1.5 max-h-44 sm:max-h-52 overflow-y-auto shrink-0 py-0.5 px-0.5">
                             ${mediaUrls.map((url, imgIndex) => `
-                                <img src="${url}" alt="صورة ${imgIndex + 1}" 
-                                     class="project-thumb-img border border-slate-200 hover:border-[#800020] cursor-pointer transition" 
-                                     onclick="changeMainProjectImage('${proj.id}', '${url}')">
+                                <button type="button" onclick="changeMainProjectImage('${proj.id}', '${url}')" class="focus:outline-none shrink-0">
+                                    <img src="${url}" alt="صورة ${imgIndex + 1}" 
+                                         class="w-9 h-9 sm:w-10 sm:h-10 object-cover rounded-md border-2 border-slate-200 hover:border-[#800020] active:scale-95 transition-all cursor-pointer">
+                                </button>
                             `).join('')}
                         </div>
                     ` : ''}
+
+                    <!-- الصورة الرئيسية تكمل باقي المساحة -->
+                    <div class="flex-1 h-44 sm:h-52 bg-slate-50 rounded-lg overflow-hidden border border-slate-100 relative">
+                        <img id="main-project-img-${proj.id}" src="${mainMedia}" alt="${proj.title}" 
+                             class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300" 
+                             onclick="openLightbox(this.src)">
+                    </div>
+
                 </div>`;
         }
 
         return `
-        <div class="project-card-custom bg-white rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden relative group">
+        <div class="project-card-custom bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden relative p-3 mb-4">
             ${isAdmin ? `
             <button class="delete-project-btn absolute top-2.5 left-2.5 z-30 w-6 h-6 rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition flex items-center justify-center" 
                     title="حذف المشروع" onclick="deleteProject('${proj.id}')">
                 <i class="fas fa-trash-alt text-[10px]"></i>
             </button> ` : ''}
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 p-3 items-center">
-                <!-- قسم الميديا -->
-                <div class="md:col-span-5 rounded-lg overflow-hidden p-0.5">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
+                <!-- قسم الميديا (الصورة الرئيسية + المصغرات) -->
+                <div class="md:col-span-5 w-full">
                     ${mediaHtml}
                 </div>
 
                 <!-- تفاصيل المشروع -->
-                <div class="md:col-span-7 flex flex-col justify-between h-full space-y-1.5">
+                <div class="md:col-span-7 flex flex-col justify-between space-y-2 mt-2 md:mt-0">
                     <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="bg-[#800020]/10 text-[#800020] font-bold text-[9px] px-2 py-0.5 rounded-full">مشروع #${index + 1}</span>
-                            ${mediaUrls.length > 1 ? `<span class="bg-slate-100 text-slate-600 font-bold text-[9px] px-1.5 py-0.5 rounded-full">📷 ${mediaUrls.length} صور</span>` : ''}
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="bg-[#800020]/10 text-[#800020] font-bold text-[10px] px-2 py-0.5 rounded-full">مشروع #${index + 1}</span>
+                            ${mediaUrls.length > 1 ? `<span class="bg-slate-100 text-slate-600 font-bold text-[10px] px-1.5 py-0.5 rounded-full">📷 ${mediaUrls.length} صور</span>` : ''}
                         </div>
-                        <h3 class="text-xs font-bold text-slate-800 hover:text-[#800020] transition truncate">${proj.title}</h3>
-                        <p class="text-[10px] text-slate-600 leading-snug mt-1 line-clamp-2">${proj.description}</p>
+                        <h3 class="text-sm font-bold text-slate-800 hover:text-[#800020] transition">${proj.title}</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed mt-1">${proj.description}</p>
                     </div>
 
-                    <div class="flex flex-wrap gap-1 pt-1 border-t border-slate-100">
-                        ${tagsList.map(tag => `<span class="bg-slate-100 text-slate-700 font-semibold text-[8px] px-1.5 py-0.5 rounded">${tag}</span>`).join('')}
+                    <div class="flex flex-wrap gap-1 pt-1.5 border-t border-slate-100">
+                        ${tagsList.map(tag => `<span class="bg-slate-100 text-slate-700 font-semibold text-[9px] px-1.5 py-0.5 rounded">${tag}</span>`).join('')}
                     </div>
 
-                    <div class="flex items-center gap-2 pt-0.5">
-                        ${proj.demo_url ? `<a href="${proj.demo_url}" target="_blank" class="px-2.5 py-0.5 bg-[#800020] hover:bg-[#600018] text-white font-bold rounded text-[10px] shadow-sm flex items-center gap-1 transition"><i class="fas fa-external-link-alt text-[8px]"></i> معاينة</a>` : ''}
-                        ${proj.github_url ? `<a href="${proj.github_url}" target="_blank" class="px-2.5 py-0.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded text-[10px] shadow-sm flex items-center gap-1 transition"><i class="fab fa-github text-[9px]"></i> GitHub</a>` : ''}
+                    <div class="flex items-center gap-2 pt-1">
+                        ${proj.demo_url ? `<a href="${proj.demo_url}" target="_blank" class="px-3 py-1 bg-[#800020] hover:bg-[#600018] text-white font-bold rounded text-xs shadow-sm flex items-center gap-1 transition"><i class="fas fa-external-link-alt text-[9px]"></i> معاينة</a>` : ''}
+                        ${proj.github_url ? `<a href="${proj.github_url}" target="_blank" class="px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded text-xs shadow-sm flex items-center gap-1 transition"><i class="fab fa-github text-[10px]"></i> GitHub</a>` : ''}
                     </div>
                 </div>
             </div>
         </div>`;
     }).join("");
-}
-
-function changeMainProjectImage(projId, newUrl) {
-    const mainImg = document.getElementById(`main-project-img-${projId}`);
-    if (mainImg) {
-        mainImg.src = newUrl;
-    }
 }
 
 function renderCertificates(items) {
