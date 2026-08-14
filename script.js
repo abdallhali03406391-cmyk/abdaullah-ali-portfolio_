@@ -272,7 +272,7 @@ function renderProjects(items) {
                             ${mediaUrls.length > 1 ? `<span class="bg-slate-100 text-slate-600 font-bold text-[10px] px-1.5 py-0.5 rounded-full">📷 ${mediaUrls.length} صور</span>` : ''}
                         </div>
                         <h3 class="text-sm font-bold text-slate-800 hover:text-[#800020] transition">${proj.title}</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed mt-1">${proj.description}</p>
+                        <p class="text-[13px] font-semibold text-slate-800 leading-relaxed mt-1">${proj.description}</p>
                     </div>
 
                     <div class="flex flex-wrap gap-1 pt-1.5 border-t border-slate-100">
