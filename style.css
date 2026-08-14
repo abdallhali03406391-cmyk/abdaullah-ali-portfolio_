@@ -206,10 +206,4 @@ body {
     border-radius: 4px;
     flex-shrink: 0;
 }
-/* تحسين وضوح وحجم خط شرح المشاريع */
-.project-card-custom p {
-    font-size: 0.85rem !important; /* تكبير الحجم حاجة بسيطة جداً (أكبر من text-xs) */
-    font-weight: 600 !important;   /* تغميق الخط ليكون واضح وقوي (Medium / Semi-bold) */
-    color: #1e293b !important;    /* لون غامق واضح جداً للعين (Slate 800) */
-    line-height: 1.6 !important;   /* مسافة مريحة بين السطور */
-}
+ 
