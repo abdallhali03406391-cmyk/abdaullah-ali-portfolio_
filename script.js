@@ -212,18 +212,21 @@ function renderProjects(items) {
         }
 
         const mainMedia = mediaUrls[0] || '';
-        
         let mediaHtml = "";
-        
-        if (proj.media_type === "video") {
-            mediaHtml = `
-                <div class="w-full rounded-lg overflow-hidden bg-slate-100">
-                    <video controls class="w-full h-auto max-h-56 object-cover rounded-lg">
-                        <source src="${mainMedia}" type="video/mp4">
-                        متصفحك لا يدعم تشغيل الفيديو.
-                    </video>
-                </div>`;
-        } else {
+
+// فحص رابط الميديا نفسه إذا كان يحتوي على فيديو أو امتداد mp4
+const isVideo = proj.media_type === "video" || 
+                (mainMedia && (mainMedia.includes(".mp4") || mainMedia.includes(".webm") || mainMedia.includes("video")));
+
+if (isVideo) {
+    mediaHtml = `
+        <div class="w-full rounded-lg overflow-hidden bg-slate-100">
+            <video controls preload="metadata" class="w-full h-auto max-h-56 object-cover rounded-lg">
+                <source src="${mainMedia}" type="video/mp4">
+                متصفحك لا يدعم تشغيل الفيديو
+            </video>
+        </div>`;
+} else {
             mediaHtml = `
                 <!-- حاوية تجمع الصورة الرئيسية والمصغرات بجانب بعض -->
                 <div class="w-full flex flex-row gap-2 items-start">
